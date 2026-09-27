@@ -2,7 +2,7 @@ name: Generate and Email Daily Heartfulness Thought
 
 on:
   schedule:
-    # 23:30 UTC = 05:00 AM IST (every morning)
+    # 23:30 UTC = 04:00 AM IST (every morning)
     - cron: '30 23 * * *'
   workflow_dispatch:
 
