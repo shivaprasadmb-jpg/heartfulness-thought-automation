@@ -10,7 +10,10 @@ DESTINATION_EMAIL = os.environ.get("DESTINATION_EMAIL")
 IMAGE_FILENAME = "daily_thought.png"
 
 def get_current_heartfulness_dates():
-    now = datetime.datetime.now()
+    # Enforce Indian Standard Time (UTC + 5:30)
+    ist_offset = datetime.timezone(datetime.timedelta(hours=5, minutes=30))
+    now = datetime.datetime.now(ist_offset)
+
     kannada_months = ["ಜನೆವರಿ", "ಫೆಬ್ರವರಿ", "ಮಾರ್ಚ್", "ಏಪ್ರಿಲ್", "ಮೇ", "ಜೂನ್", 
                       "ಜುಲೈ", "ಆಗಸ್ಟ್", "ಸೆಪ್ಟೆಂಬರ್", "ಅಕ್ಟೋಬರ್", "ನವೆಂಬರ್", "ಡಿಸೆಂಬರ್"]
     kannada_weekdays = ["ಭಾನುವಾರ", "ಸೋಮವಾರ", "ಮಂಗಳವಾರ", "ಬುಧವಾರ", "ಗುರುವಾರ", "ಶುಕ್ರವಾರ", "ಶನಿವಾರ"]
