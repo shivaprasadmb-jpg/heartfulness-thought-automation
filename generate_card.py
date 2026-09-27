@@ -6,7 +6,7 @@ from playwright.sync_api import sync_playwright
 class HeartfulnessCardGenerator:
     """
     Renders high-contrast, elder-friendly bilingual thought cards
-    with centered headers and crystal-clear Kannada Unicode font support.
+    with natural left alignment, robust cross-platform symbols, and centered titles.
     """
 
     @classmethod
@@ -14,20 +14,20 @@ class HeartfulnessCardGenerator:
         kn_quote = data.get("kannada_quote", "").strip().strip("“\"").strip("”\"").strip()
         en_quote = data.get("english_quote", "").strip().strip("“\"").strip("”\"").strip()
 
-        # Dynamic sizing keeping high legibility and large print for elders
+        # Dynamic size scaling prioritizing legibility for elders
         max_len = max(len(kn_quote), len(en_quote))
         if max_len < 120:
-            kn_fs = "24px"
-            en_fs = "23px"
-            lh = "1.85"
+            kn_fs = "25px"
+            en_fs = "24px"
+            lh = "1.8"
         elif max_len < 220:
-            kn_fs = "22px"
-            en_fs = "21px"
-            lh = "1.75"
+            kn_fs = "23px"
+            en_fs = "22px"
+            lh = "1.7"
         else:
-            kn_fs = "20px"
-            en_fs = "19px"
-            lh = "1.65"
+            kn_fs = "21px"
+            en_fs = "20px"
+            lh = "1.6"
 
         return f"""
         <!DOCTYPE html>
@@ -56,17 +56,17 @@ class HeartfulnessCardGenerator:
                 -webkit-font-smoothing: antialiased;
             }}
 
-            /* Main Card Canvas */
+            /* Main Card Frame */
             .card-wrapper {{
                 width: 574px;
                 background: radial-gradient(circle at 50% 25%, #FCFBF9 0%, #F5F0E6 100%);
                 border: 1.5px solid #D5C7B5;
                 position: relative;
-                padding: 38px 36px 28px;
+                padding: 40px 36px 30px;
                 box-shadow: 0 10px 25px rgba(60, 45, 30, 0.08);
             }}
 
-            /* Inset Framing Line */
+            /* Inset Decorative Hairline */
             .inner-border {{
                 position: absolute;
                 top: 8px; left: 8px; right: 8px; bottom: 8px;
@@ -74,7 +74,7 @@ class HeartfulnessCardGenerator:
                 pointer-events: none;
             }}
 
-            /* Vintage Corner Notches */
+            /* Corner Ornaments */
             .corner {{
                 position: absolute;
                 width: 14px;
@@ -87,16 +87,16 @@ class HeartfulnessCardGenerator:
             .c-bl {{ bottom: 3px; left: 3px; border-width: 0 0 2.5px 2.5px; }}
             .c-br {{ bottom: 3px; right: 3px; border-width: 0 2.5px 2.5px 0; }}
 
-            /* Centered Header Containers */
+            /* Centered Title Areas */
             .title-area {{
                 text-align: center;
                 margin-bottom: 22px;
             }}
 
-            /* Kannada Styling */
+            /* Kannada Typography */
             .header-kn {{
                 font-family: 'Noto Serif Kannada', serif;
-                font-size: 23px;
+                font-size: 24px;
                 font-weight: 700;
                 color: #6E261B;
                 letter-spacing: 0.5px;
@@ -111,8 +111,8 @@ class HeartfulnessCardGenerator:
             .quote-container-kn {{
                 position: relative;
                 padding-left: 20px;
-                border-left: 3px solid #C48E7C;
-                margin-bottom: 14px;
+                border-left: 3.5px solid #C48E7C;
+                margin-bottom: 12px;
             }}
             .quote-kn {{
                 font-family: 'Noto Serif Kannada', serif;
@@ -120,8 +120,7 @@ class HeartfulnessCardGenerator:
                 line-height: {lh};
                 font-weight: 600;
                 color: #2D1A16;
-                text-align: justify;
-                text-justify: inter-word;
+                text-align: left;
             }}
             .author-kn {{
                 text-align: right;
@@ -129,16 +128,16 @@ class HeartfulnessCardGenerator:
                 font-size: 19px;
                 font-weight: 700;
                 color: #6E261B;
-                margin-bottom: 22px;
+                margin-bottom: 24px;
             }}
 
-            /* Divider */
+            /* Universal Center Divider (Standard Unicode Glyphs) */
             .divider {{
                 display: flex;
                 align-items: center;
                 justify-content: center;
                 gap: 16px;
-                margin: 6px 0 26px;
+                margin: 4px 0 28px;
             }}
             .divider-line {{
                 height: 1px;
@@ -147,11 +146,11 @@ class HeartfulnessCardGenerator:
             }}
             .divider-symbol {{
                 color: #9E7D63;
-                font-size: 13px;
-                letter-spacing: 4px;
+                font-size: 11px;
+                letter-spacing: 6px;
             }}
 
-            /* English Styling (High-Legibility Modern Sans) */
+            /* English Typography */
             .header-en {{
                 font-family: 'Cinzel', serif;
                 font-size: 19px;
@@ -170,8 +169,8 @@ class HeartfulnessCardGenerator:
             .quote-container-en {{
                 position: relative;
                 padding-left: 20px;
-                border-left: 3px solid #6C8E9C;
-                margin-bottom: 14px;
+                border-left: 3.5px solid #6C8E9C;
+                margin-bottom: 12px;
             }}
             .quote-en {{
                 font-family: 'Plus Jakarta Sans', sans-serif;
@@ -179,9 +178,8 @@ class HeartfulnessCardGenerator:
                 line-height: {lh};
                 font-weight: 600;
                 color: #172429;
-                text-align: justify;
-                text-justify: inter-word;
-                letter-spacing: 0.15px;
+                text-align: left;
+                letter-spacing: 0.1px;
             }}
             .author-en {{
                 text-align: right;
@@ -189,7 +187,7 @@ class HeartfulnessCardGenerator:
                 font-size: 18px;
                 font-weight: 700;
                 color: #1A3644;
-                margin-bottom: 14px;
+                margin-bottom: 16px;
             }}
 
             /* Footer */
@@ -224,10 +222,10 @@ class HeartfulnessCardGenerator:
                 </div>
                 <div class="author-kn">{data.get('kannada_author', '~ ದಾಜಿ')}</div>
 
-                <!-- Center Divider -->
+                <!-- Center Divider with Standard Shapes -->
                 <div class="divider">
                     <div class="divider-line"></div>
-                    <div class="divider-symbol">✦ 𑁍 ✦</div>
+                    <div class="divider-symbol">✦ ❖ ✦</div>
                     <div class="divider-line"></div>
                 </div>
 
