@@ -1,43 +1,33 @@
-# ==============================================================================
-# SAVE THIS ENTIRE BLOCK AS: .github/workflows/daily_dispatch.yml
-# This workflow runs in the GitHub Cloud to generate and email your thought card.
-# Indentation (spaces) is critical in this file.
-# ==============================================================================
+# === SAVE THIS ENTIRE BLOCK AS: .github/workflows/daily_dispatch.yml ===
+# Indentation (spacing) is CRITICAL in this file. Do not add extra spaces.
 name: Generate and Email Daily Heartfulness Thought
 
 on:
   schedule:
-    # Trigger automatically at 00:00 UTC (05:30 AM IST) every morning.
-    # To change the time, visit https://crontab.guru/ (format is M H D M W).
+    # Trigger automatically at 00:00 UTC (05:30 IST) every morning.
     - cron: '0 0 * * *'
   workflow_dispatch: # This adds a manual 'Run' button for testing.
 
 jobs:
-  run-image-dispatcher:
-    # Use the latest Ubuntu Linux server provided by GitHub.
+  run-dispatch-job: # This defines the main job
     runs-on: ubuntu-latest
     steps:
-      - name: Check out repository code
+      - name: Check out repo code
         uses: actions/checkout@v4
 
       - name: Set up Python Environment
         uses: actions/setup-python@v5
         with:
-          # Match the Python version you use locally.
           python-version: '3.11'
 
-      - name: Install System Dependencies
+      - name: Install dependencies
         run: |
-          # Install Python libraries from requirements.txt.
           pip install -r requirements.txt
-          # Install the Chromium browser needed by Playwright to render the Kannada font.
           python -m playwright install chromium
 
-      - name: Execute Image Generator and Email Dispatcher
+      - name: Run image generator and email dispatcher
         env:
-          # Securely map the cloud secrets to environment variables used by the script.
-          # Ensure you have GMAIL_USER, GMAIL_APP_PASSWORD, and DESTINATION_EMAIL
-          # added under Settings > Secrets and variables > Actions > Repository secrets.
+          # Securely map the cloud secrets to environment variables
           GMAIL_USER: ${{ secrets.GMAIL_USER }}
           GMAIL_APP_PASSWORD: ${{ secrets.GMAIL_APP_PASSWORD }}
           DESTINATION_EMAIL: ${{ secrets.DESTINATION_EMAIL }}
