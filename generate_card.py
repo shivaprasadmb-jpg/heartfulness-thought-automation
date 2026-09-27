@@ -5,8 +5,8 @@ from playwright.sync_api import sync_playwright
 
 class HeartfulnessCardGenerator:
     """
-    Renders an elegant, aesthetically refined daily thought card
-    with textured parchment, balanced editorial typography, and subtle motif accents.
+    Renders high-contrast, elder-friendly bilingual thought cards
+    with centered headers and crystal-clear Kannada Unicode font support.
     """
 
     @classmethod
@@ -14,23 +14,20 @@ class HeartfulnessCardGenerator:
         kn_quote = data.get("kannada_quote", "").strip().strip("“\"").strip("”\"").strip()
         en_quote = data.get("english_quote", "").strip().strip("“\"").strip("”\"").strip()
 
-        # Dynamic size scaling based on quote volume
+        # Dynamic sizing keeping high legibility and large print for elders
         max_len = max(len(kn_quote), len(en_quote))
-        if max_len < 110:
-            kn_quote_fs = "23px"
-            en_quote_fs = "22px"
-            line_height = "1.85"
-            content_padding = "24px 38px"
+        if max_len < 120:
+            kn_fs = "24px"
+            en_fs = "23px"
+            lh = "1.85"
         elif max_len < 220:
-            kn_quote_fs = "21px"
-            en_quote_fs = "20px"
-            line_height = "1.75"
-            content_padding = "18px 36px"
+            kn_fs = "22px"
+            en_fs = "21px"
+            lh = "1.75"
         else:
-            kn_quote_fs = "19px"
-            en_quote_fs = "18px"
-            line_height = "1.6"
-            content_padding = "12px 32px"
+            kn_fs = "20px"
+            en_fs = "19px"
+            lh = "1.65"
 
         return f"""
         <!DOCTYPE html>
@@ -39,7 +36,7 @@ class HeartfulnessCardGenerator:
         <meta charset="UTF-8">
         <link rel="preconnect" href="https://fonts.googleapis.com">
         <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-        <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700&family=Cormorant+Garamond:ital,wght@0,500;0,600;1,500&family=Noto+Serif+Kannada:wght@500;600;700&family=Plus+Jakarta+Sans:wght@500;600;700&display=swap" rel="stylesheet">
+        <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@700&family=Noto+Serif+Kannada:wght@500;600;700&family=Plus+Jakarta+Sans:wght@500;600;700&display=swap" rel="stylesheet">
         <style>
             * {{
                 box-sizing: border-box;
@@ -48,28 +45,28 @@ class HeartfulnessCardGenerator:
             }}
 
             body {{
-                width: 620px;
-                min-height: 1060px;
+                width: 630px;
+                min-height: 1080px;
                 background-color: #EDE8DF;
                 display: flex;
                 justify-content: center;
                 align-items: center;
-                padding: 30px 24px;
-                font-family: 'Noto Serif Kannada', 'Cormorant Garamond', serif;
+                padding: 30px 20px;
+                font-family: 'Noto Serif Kannada', 'Plus Jakarta Sans', sans-serif;
                 -webkit-font-smoothing: antialiased;
             }}
 
-            /* Main Card Frame with layered borders & subtle paper glow */
+            /* Main Card Canvas */
             .card-wrapper {{
-                width: 564px;
-                background: radial-gradient(circle at 50% 30%, #FCFBF8 0%, #F6F1E7 100%);
+                width: 574px;
+                background: radial-gradient(circle at 50% 25%, #FCFBF9 0%, #F5F0E6 100%);
                 border: 1.5px solid #D5C7B5;
                 position: relative;
-                padding: {content_padding};
-                box-shadow: 0 10px 30px rgba(70, 50, 35, 0.08);
+                padding: 38px 36px 28px;
+                box-shadow: 0 10px 25px rgba(60, 45, 30, 0.08);
             }}
 
-            /* Inset gold-parchment hairline frame */
+            /* Inset Framing Line */
             .inner-border {{
                 position: absolute;
                 top: 8px; left: 8px; right: 8px; bottom: 8px;
@@ -77,7 +74,7 @@ class HeartfulnessCardGenerator:
                 pointer-events: none;
             }}
 
-            /* Four decorative vintage corner brackets */
+            /* Vintage Corner Notches */
             .corner {{
                 position: absolute;
                 width: 14px;
@@ -90,66 +87,58 @@ class HeartfulnessCardGenerator:
             .c-bl {{ bottom: 3px; left: 3px; border-width: 0 0 2.5px 2.5px; }}
             .c-br {{ bottom: 3px; right: 3px; border-width: 0 2.5px 2.5px 0; }}
 
-            /* Subtle watermark lotus motif */
-            .watermark-emblem {{
-                position: absolute;
-                top: 48%;
-                left: 50%;
-                transform: translate(-50%, -50%);
-                font-size: 140px;
-                color: rgba(180, 155, 130, 0.06);
-                user-select: none;
-                pointer-events: none;
-                font-family: 'Cinzel', serif;
+            /* Centered Header Containers */
+            .title-area {{
+                text-align: center;
+                margin-bottom: 22px;
             }}
 
-            /* Header Badges */
+            /* Kannada Styling */
             .header-kn {{
-                font-size: 21px;
+                font-family: 'Noto Serif Kannada', serif;
+                font-size: 23px;
                 font-weight: 700;
                 color: #6E261B;
-                letter-spacing: 0.3px;
+                letter-spacing: 0.5px;
                 margin-bottom: 6px;
             }}
             .date-kn {{
-                font-family: 'Plus Jakarta Sans', sans-serif;
-                font-size: 15px;
+                font-family: 'Noto Serif Kannada', serif;
+                font-size: 16px;
                 font-weight: 600;
-                color: #8C6A5A;
-                margin-bottom: 20px;
-                text-transform: capitalize;
+                color: #7D5C4E;
             }}
-
-            /* Quote block with left accent spine */
             .quote-container-kn {{
                 position: relative;
-                padding-left: 18px;
-                border-left: 2.5px solid #C48E7C;
-                margin-bottom: 16px;
+                padding-left: 20px;
+                border-left: 3px solid #C48E7C;
+                margin-bottom: 14px;
             }}
             .quote-kn {{
-                font-size: {kn_quote_fs};
-                line-height: {line_height};
+                font-family: 'Noto Serif Kannada', serif;
+                font-size: {kn_fs};
+                line-height: {lh};
                 font-weight: 600;
-                color: #301E1A;
+                color: #2D1A16;
                 text-align: justify;
                 text-justify: inter-word;
             }}
             .author-kn {{
                 text-align: right;
-                font-size: 18px;
+                font-family: 'Noto Serif Kannada', serif;
+                font-size: 19px;
                 font-weight: 700;
                 color: #6E261B;
-                margin-bottom: 26px;
+                margin-bottom: 22px;
             }}
 
-            /* Spiritual emblem separator */
+            /* Divider */
             .divider {{
                 display: flex;
                 align-items: center;
                 justify-content: center;
                 gap: 16px;
-                margin: 10px 0 24px;
+                margin: 6px 0 26px;
             }}
             .divider-line {{
                 height: 1px;
@@ -162,13 +151,13 @@ class HeartfulnessCardGenerator:
                 letter-spacing: 4px;
             }}
 
-            /* English Section */
+            /* English Styling (High-Legibility Modern Sans) */
             .header-en {{
                 font-family: 'Cinzel', serif;
-                font-size: 18px;
+                font-size: 19px;
                 font-weight: 700;
                 color: #1A3644;
-                letter-spacing: 1.5px;
+                letter-spacing: 2px;
                 text-transform: uppercase;
                 margin-bottom: 6px;
             }}
@@ -176,41 +165,39 @@ class HeartfulnessCardGenerator:
                 font-family: 'Plus Jakarta Sans', sans-serif;
                 font-size: 14px;
                 font-weight: 600;
-                color: #637882;
-                margin-bottom: 20px;
+                color: #5C707A;
             }}
             .quote-container-en {{
                 position: relative;
-                padding-left: 18px;
-                border-left: 2.5px solid #7899A6;
-                margin-bottom: 16px;
+                padding-left: 20px;
+                border-left: 3px solid #6C8E9C;
+                margin-bottom: 14px;
             }}
             .quote-en {{
-                font-family: 'Cormorant Garamond', serif;
-                font-size: {en_quote_fs};
-                line-height: {line_height};
+                font-family: 'Plus Jakarta Sans', sans-serif;
+                font-size: {en_fs};
+                line-height: {lh};
                 font-weight: 600;
-                font-style: italic;
-                color: #1E282D;
+                color: #172429;
                 text-align: justify;
                 text-justify: inter-word;
+                letter-spacing: 0.15px;
             }}
             .author-en {{
                 text-align: right;
-                font-family: 'Cinzel', serif;
-                font-size: 16px;
+                font-family: 'Plus Jakarta Sans', sans-serif;
+                font-size: 18px;
                 font-weight: 700;
                 color: #1A3644;
-                letter-spacing: 1px;
-                margin-bottom: 16px;
+                margin-bottom: 14px;
             }}
 
-            /* Bottom subtle brand footer */
+            /* Footer */
             .footer {{
                 margin-top: 18px;
                 text-align: center;
                 font-family: 'Cinzel', serif;
-                font-size: 11px;
+                font-size: 12px;
                 letter-spacing: 3px;
                 text-transform: uppercase;
                 color: #A39382;
@@ -221,7 +208,6 @@ class HeartfulnessCardGenerator:
         <body>
             <div class="card-wrapper">
                 <div class="inner-border"></div>
-                <div class="watermark-emblem">𑁍</div>
 
                 <div class="corner c-tl"></div>
                 <div class="corner c-tr"></div>
@@ -229,8 +215,10 @@ class HeartfulnessCardGenerator:
                 <div class="corner c-br"></div>
 
                 <!-- Kannada Section -->
-                <div class="header-kn">{data.get('kannada_header', 'ಒಂದು ಸುಂದರ ವಿಚಾರ')}</div>
-                <div class="date-kn">{data.get('kannada_date', '')}</div>
+                <div class="title-area">
+                    <div class="header-kn">{data.get('kannada_header', 'ಒಂದು ಸುಂದರ ವಿಚಾರ')}</div>
+                    <div class="date-kn">{data.get('kannada_date', '')}</div>
+                </div>
                 <div class="quote-container-kn">
                     <div class="quote-kn">“{kn_quote}”</div>
                 </div>
@@ -244,8 +232,10 @@ class HeartfulnessCardGenerator:
                 </div>
 
                 <!-- English Section -->
-                <div class="header-en">{data.get('english_header', 'One Beautiful Thought')}</div>
-                <div class="date-en">{data.get('english_date', '')}</div>
+                <div class="title-area">
+                    <div class="header-en">{data.get('english_header', 'One Beautiful Thought')}</div>
+                    <div class="date-en">{data.get('english_date', '')}</div>
+                </div>
                 <div class="quote-container-en">
                     <div class="quote-en">“{en_quote}”</div>
                 </div>
@@ -263,7 +253,7 @@ class HeartfulnessCardGenerator:
         html_content = cls._generate_html_template(data)
         with sync_playwright() as p:
             browser = p.chromium.launch()
-            page = browser.new_page(viewport={"width": 620, "height": 1100})
+            page = browser.new_page(viewport={"width": 630, "height": 1100})
             page.set_content(html_content)
             page.wait_for_load_state("networkidle")
             time.sleep(0.5)
