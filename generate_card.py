@@ -5,28 +5,29 @@ from playwright.sync_api import sync_playwright
 
 class HeartfulnessCardGenerator:
     """
-    Renders dynamic, high-aesthetic 9:16 WhatsApp Status thought cards
-    with balanced bilingual color separation and content-aware scaling.
+    Renders clean, proportional cards matching the Redmi Notes parchment aesthetic.
     """
-
-    @staticmethod
-    def _compute_font_sizes(text_len):
-        """Dynamically scales font sizes based on quote length."""
-        if text_len < 120:
-            return {"quote_fs": "31px", "lh": "1.75", "head_fs": "32px", "author_fs": "25px"}
-        elif text_len < 220:
-            return {"quote_fs": "27px", "lh": "1.65", "head_fs": "30px", "author_fs": "23px"}
-        else:
-            return {"quote_fs": "23px", "lh": "1.55", "head_fs": "28px", "author_fs": "21px"}
 
     @classmethod
     def _generate_html_template(cls, data):
+        # Clean extra quotation marks or spaces
         kn_quote = data.get("kannada_quote", "").strip().strip("“\"").strip("”\"").strip()
         en_quote = data.get("english_quote", "").strip().strip("“\"").strip("”\"").strip()
 
-        # Compute balanced font size according to the longer passage
+        # Dynamic sizing for quote length so it never looks sparse or cramped
         max_len = max(len(kn_quote), len(en_quote))
-        sizes = cls._compute_font_sizes(max_len)
+        if max_len < 100:
+            font_size = "23px"
+            line_height = "1.85"
+            section_gap = "34px"
+        elif max_len < 200:
+            font_size = "21px"
+            line_height = "1.75"
+            section_gap = "28px"
+        else:
+            font_size = "19px"
+            line_height = "1.65"
+            section_gap = "22px"
 
         return f"""
         <!DOCTYPE html>
@@ -35,7 +36,7 @@ class HeartfulnessCardGenerator:
         <meta charset="UTF-8">
         <link rel="preconnect" href="https://fonts.googleapis.com">
         <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-        <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700&family=Noto+Sans+Kannada:wght@400;600;700&family=Noto+Serif+Kannada:wght@500;700&family=Plus+Jakarta+Sans:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
+        <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Kannada:wght@400;600;700&family=Noto+Serif+Kannada:wght@600;700&family=Plus+Jakarta+Sans:wght@400;600;700&display=swap" rel="stylesheet">
         <style>
             * {{
                 box-sizing: border-box;
@@ -43,213 +44,161 @@ class HeartfulnessCardGenerator:
                 padding: 0;
             }}
 
-            /* Standard 9:16 WhatsApp Status Canvas */
+            /* Canvas sized to match the Redmi Notes reference card aspect ratio */
             body {{
-                width: 1080px;
-                height: 1920px;
-                background: linear-gradient(180deg, #FBF8F3 0%, #F5EFE6 100%);
+                width: 580px;
+                min-height: 1040px;
+                background-color: #F8F5F0;
                 display: flex;
                 justify-content: center;
                 align-items: center;
-                padding: 60px 48px;
+                padding: 30px 24px;
                 font-family: 'Noto Sans Kannada', 'Plus Jakarta Sans', sans-serif;
                 -webkit-font-smoothing: antialiased;
             }}
 
-            .frame {{
-                width: 100%;
-                height: 100%;
-                border: 2px solid #D8C8B8;
+            /* Outer parchment box */
+            .card-wrapper {{
+                width: 532px;
+                background-color: #FBF9F5;
+                border: 1.5px solid #DDD3C4;
                 position: relative;
-                padding: 80px 64px 60px;
+                padding: 44px 34px 30px;
                 display: flex;
                 flex-direction: column;
-                justify-content: space-between;
-                background-color: rgba(255, 255, 255, 0.55);
-                box-shadow: inset 0 0 80px rgba(216, 200, 184, 0.25);
             }}
 
-            /* Corner Ornaments */
+            /* Corner ornamental brackets matching Mi Notes */
             .corner {{
                 position: absolute;
-                width: 24px;
-                height: 24px;
-                border-color: #A47864;
+                width: 14px;
+                height: 14px;
+                border-color: #C8BAA8;
                 border-style: solid;
             }}
-            .c-tl {{ top: 10px; left: 10px; border-width: 3px 0 0 3px; }}
-            .c-tr {{ top: 10px; right: 10px; border-width: 3px 3px 0 0; }}
-            .c-bl {{ bottom: 10px; left: 10px; border-width: 0 0 3px 3px; }}
-            .c-br {{ bottom: 10px; right: 10px; border-width: 0 3px 3px 0; }}
+            .c-tl {{ top: 4px; left: 4px; border-width: 2px 0 0 2px; }}
+            .c-tr {{ top: 4px; right: 4px; border-width: 2px 2px 0 0; }}
+            .c-bl {{ bottom: 4px; left: 4px; border-width: 0 0 2px 2px; }}
+            .c-br {{ bottom: 4px; right: 4px; border-width: 0 2px 2px 0; }}
 
-            /* Inner decorative inset ring */
-            .frame::after {{
-                content: '';
-                position: absolute;
-                top: 14px; left: 14px; right: 14px; bottom: 14px;
-                border: 1px solid rgba(164, 120, 100, 0.35);
-                pointer-events: none;
-            }}
-
-            .content-stack {{
+            /* Content container */
+            .content {{
                 display: flex;
                 flex-direction: column;
-                flex-grow: 1;
-                justify-content: space-evenly;
             }}
 
-            /* Section 1: Kannada (Terracotta / Crimson Theme) */
-            .section-kn {{
-                color: #2F1E19;
+            /* Section Styling */
+            .section {{
+                margin-bottom: {section_gap};
             }}
+
+            /* Kannada Headings */
             .header-kn {{
-                color: #8C2D19;
                 font-family: 'Noto Serif Kannada', serif;
-                font-size: {sizes['head_fs']};
+                font-size: 23px;
                 font-weight: 700;
-                letter-spacing: 0.5px;
-                margin-bottom: 8px;
+                color: #4A352F;
+                margin-bottom: 12px;
+                letter-spacing: 0.2px;
             }}
             .date-kn {{
-                font-size: 21px;
+                font-size: 18px;
                 font-weight: 600;
-                color: #7A5C50;
-                margin-bottom: 24px;
-            }}
-            .quote-box-kn {{
-                position: relative;
-                padding-left: 28px;
-                border-left: 4px solid #C4826F;
+                color: #5A443D;
+                margin-bottom: 22px;
             }}
             .quote-kn {{
-                font-size: {sizes['quote_fs']};
-                line-height: {sizes['lh']};
-                font-weight: 500;
-                color: #261612;
-                text-align: justify;
-                text-justify: inter-word;
+                font-size: {font_size};
+                line-height: {line_height};
+                font-weight: 400;
+                color: #382823;
+                text-align: left;
+                margin-bottom: 18px;
             }}
             .author-kn {{
-                font-size: {sizes['author_fs']};
+                font-size: 19px;
                 font-weight: 700;
-                color: #8C2D19;
-                margin-top: 20px;
-                text-align: right;
+                color: #4A352F;
             }}
 
-            /* Divider */
-            .divider {{
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                gap: 20px;
-                margin: 20px 0;
-            }}
-            .divider-line {{
+            /* Subtle separator */
+            .separator {{
                 height: 1px;
-                background: linear-gradient(90deg, transparent, #C8B8A6, transparent);
-                flex-grow: 1;
-            }}
-            .divider-emblem {{
-                color: #9C7A60;
-                font-size: 16px;
-                letter-spacing: 3px;
+                background-color: #EADFD0;
+                margin: 6px 0 {section_gap};
+                width: 100%;
             }}
 
-            /* Section 2: English (Deep Teal / Slate Theme) */
-            .section-en {{
-                color: #1A282C;
-            }}
+            /* English Headings */
             .header-en {{
-                color: #1F4E5B;
-                font-family: 'Cinzel', serif;
-                font-size: {sizes['head_fs']};
+                font-family: 'Plus Jakarta Sans', sans-serif;
+                font-size: 21px;
                 font-weight: 700;
-                letter-spacing: 1.5px;
-                text-transform: uppercase;
-                margin-bottom: 8px;
+                color: #4A352F;
+                margin-bottom: 10px;
+                letter-spacing: -0.2px;
             }}
             .date-en {{
-                font-size: 20px;
-                font-weight: 600;
-                color: #556E75;
                 font-family: 'Plus Jakarta Sans', sans-serif;
-                margin-bottom: 24px;
-            }}
-            .quote-box-en {{
-                position: relative;
-                padding-left: 28px;
-                border-left: 4px solid #5C8996;
+                font-size: 17px;
+                font-weight: 600;
+                color: #5A443D;
+                margin-bottom: 20px;
             }}
             .quote-en {{
                 font-family: 'Plus Jakarta Sans', sans-serif;
-                font-size: {sizes['quote_fs']};
-                line-height: {sizes['lh']};
+                font-size: {font_size};
+                line-height: {line_height};
                 font-weight: 400;
-                color: #172428;
-                font-style: italic;
-                text-align: justify;
-                text-justify: inter-word;
+                color: #382823;
+                text-align: left;
+                margin-bottom: 18px;
             }}
             .author-en {{
-                font-family: 'Cinzel', serif;
-                font-size: {sizes['author_fs']};
+                font-family: 'Plus Jakarta Sans', sans-serif;
+                font-size: 19px;
                 font-weight: 700;
-                color: #1F4E5B;
-                margin-top: 20px;
-                text-align: right;
-                letter-spacing: 1px;
+                color: #4A352F;
             }}
 
             /* Footer */
             .footer {{
+                margin-top: 36px;
                 text-align: center;
-                padding-top: 15px;
-                font-size: 17px;
-                letter-spacing: 2px;
-                text-transform: uppercase;
-                color: #8C7C70;
-                font-weight: 600;
+                font-size: 13px;
+                color: #A99B8B;
+                letter-spacing: 0.5px;
             }}
         </style>
         </head>
         <body>
-            <div class="frame">
+            <div class="card-wrapper">
                 <div class="corner c-tl"></div>
                 <div class="corner c-tr"></div>
                 <div class="corner c-bl"></div>
                 <div class="corner c-br"></div>
 
-                <div class="content-stack">
+                <div class="content">
                     <!-- Kannada Section -->
-                    <div class="section-kn">
+                    <div class="section">
                         <div class="header-kn">{data.get('kannada_header', 'ಒಂದು ಸುಂದರ ವಿಚಾರ')}</div>
                         <div class="date-kn">{data.get('kannada_date', '')}</div>
-                        <div class="quote-box-kn">
-                            <div class="quote-kn">“ {kn_quote} ”</div>
-                        </div>
+                        <div class="quote-kn">“{kn_quote}”</div>
                         <div class="author-kn">{data.get('kannada_author', '~ ದಾಜಿ')}</div>
                     </div>
 
-                    <!-- Divider -->
-                    <div class="divider">
-                        <div class="divider-line"></div>
-                        <div class="divider-emblem">✦ 𑁍 ✦</div>
-                        <div class="divider-line"></div>
-                    </div>
+                    <div class="separator"></div>
 
                     <!-- English Section -->
-                    <div class="section-en">
+                    <div class="section">
                         <div class="header-en">{data.get('english_header', 'One Beautiful Thought')}</div>
                         <div class="date-en">{data.get('english_date', '')}</div>
-                        <div class="quote-box-en">
-                            <div class="quote-en">“ {en_quote} ”</div>
-                        </div>
+                        <div class="quote-en">“{en_quote}”</div>
                         <div class="author-en">{data.get('english_author', '~ Daaji')}</div>
                     </div>
                 </div>
 
-                <div class="footer">Heartfulness</div>
+                <div class="footer">Created with Heartfulness</div>
             </div>
         </body>
         </html>
@@ -257,19 +206,22 @@ class HeartfulnessCardGenerator:
 
     @classmethod
     def create_card(cls, data, output_filename="daily_thought.png"):
-        """Renders 1080x1920 px vertical WhatsApp status card."""
+        """Renders cleanly proportioned card matching Redmi Notes format."""
         html_content = cls._generate_html_template(data)
         with sync_playwright() as p:
             browser = p.chromium.launch()
-            page = browser.new_page(viewport={"width": 1080, "height": 1920})
+            # Viewport set to standard compact note aspect
+            page = browser.new_page(viewport={"width": 580, "height": 1040})
             page.set_content(html_content)
             page.wait_for_load_state("networkidle")
-            time.sleep(0.6)  # Ensure web fonts finish rasterizing
-            page.screenshot(path=output_filename, full_page=False, omit_background=False)
+            time.sleep(0.5)
+
+            # Locate the wrapper card and snapshot it tightly
+            card_element = page.locator(".card-wrapper")
+            card_element.screenshot(path=output_filename)
             browser.close()
 
         return output_filename
-
 
 # ==============================================================================
 # DATA AND TEST EXECUTION
