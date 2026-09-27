@@ -1,15 +1,13 @@
-# === SAVE THIS ENTIRE BLOCK AS: .github/workflows/daily_dispatch.yml ===
-# Indentation (spacing) is CRITICAL in this file. Do not add extra spaces.
 name: Generate and Email Daily Heartfulness Thought
 
 on:
   schedule:
-    # Trigger automatically at 00:00 UTC (05:30 IST) every morning.
-    - cron: '0 0 * * *'
-  workflow_dispatch: # This adds a manual 'Run' button for testing.
+    # 23:30 UTC = 05:00 AM IST (every morning)
+    - cron: '30 23 * * *'
+  workflow_dispatch:
 
 jobs:
-  run-dispatch-job: # This defines the main job
+  run-dispatch-job:
     runs-on: ubuntu-latest
     steps:
       - name: Check out repo code
@@ -27,7 +25,6 @@ jobs:
 
       - name: Run image generator and email dispatcher
         env:
-          # Securely map the cloud secrets to environment variables
           GMAIL_USER: ${{ secrets.GMAIL_USER }}
           GMAIL_APP_PASSWORD: ${{ secrets.GMAIL_APP_PASSWORD }}
           DESTINATION_EMAIL: ${{ secrets.DESTINATION_EMAIL }}
