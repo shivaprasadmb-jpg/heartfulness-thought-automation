@@ -38,9 +38,16 @@ def get_current_heartfulness_dates():
 
 
 def clean_text(raw_html_or_text):
-    """Strips HTML tags and normalizes whitespace."""
-    text = re.sub(r'<[^>]+>', ' ', raw_html_or_text)
+    """Strips <style>, <script>, and all HTML markup cleanly."""
+    # 1. Strip CSS style blocks completely so CSS font names like 'Helvetica' vanish
+    text = re.sub(r'<style[^>]*>[\s\S]*?</style>', ' ', raw_html_or_text, flags=re.IGNORECASE)
+    # 2. Strip Script blocks
+    text = re.sub(r'<script[^>]*>[\s\S]*?</script>', ' ', text, flags=re.IGNORECASE)
+    # 3. Strip HTML tags
+    text = re.sub(r'<[^>]+>', ' ', text)
+    # 4. Unescape HTML entities (&nbsp;, &quot;, etc.)
     text = html.unescape(text)
+    # 5. Normalize whitespace
     text = re.sub(r'\s+', ' ', text)
     return text.strip()
 
@@ -55,7 +62,7 @@ def clean_quote_punctuation(text):
 def fetch_latest_thought_from_email(fallback_kn_date, fallback_en_date):
     """
     Connects to Gmail's All Mail folder, scans recent thought emails,
-    and extracts both Kannada and English quotes reliably.
+    and extracts authentic Kannada and English sentences.
     """
     try:
         mail = imaplib.IMAP4_SSL("imap.gmail.com")
@@ -79,7 +86,7 @@ def fetch_latest_thought_from_email(fallback_kn_date, fallback_en_date):
         kn_text = ""
         en_text = ""
 
-        # Scan backwards across recent messages in the thread to capture both languages
+        # Scan backwards across messages to capture both parts
         for msg_id in reversed(id_list[-15:]):
             _, data = mail.fetch(msg_id, "(RFC822)")
             raw = email.message_from_bytes(data[0][1])
@@ -99,17 +106,22 @@ def fetch_latest_thought_from_email(fallback_kn_date, fallback_en_date):
 
             plain = clean_text(body_content)
 
-            # Extract Kannada quote if not yet found
+            # Extract Kannada quote (must contain Indic characters and spaces)
             if not kn_text and "ಒಂದು ಸುಂದರ ವಿಚಾರ" in plain:
-                m = re.search(r"ಒಂದು ಸುಂದರ ವಿಚಾರ[^“\"]*?[“\"]([^”\"]+)[”\"]", plain)
-                if m:
-                    kn_text = clean_quote_punctuation(m.group(1))
+                for match in re.finditer(r"[“\"]([^”\"]{20,})[”\"]", plain):
+                    candidate = match.group(1).strip()
+                    if any('\u0c80' <= c <= '\u0cff' for c in candidate):
+                        kn_text = clean_quote_punctuation(candidate)
+                        break
 
-            # Extract English quote if not yet found
+            # Extract English quote (must be an actual sentence with multiple words)
             if not en_text and "One Beautiful Thought" in plain:
-                m = re.search(r"One Beautiful Thought[^“\"]*?[“\"]([^”\"]+)[”\"]", plain)
-                if m:
-                    en_text = clean_quote_punctuation(m.group(1))
+                for match in re.finditer(r"[“\"]([^”\"]{20,})[”\"]", plain):
+                    candidate = match.group(1).strip()
+                    # Must contain spaces and be a natural English sentence, not CSS metadata
+                    if " " in candidate and not candidate.lower().startswith("font") and "helvetica" not in candidate.lower():
+                        en_text = clean_quote_punctuation(candidate)
+                        break
 
             if kn_text and en_text:
                 break
@@ -117,9 +129,9 @@ def fetch_latest_thought_from_email(fallback_kn_date, fallback_en_date):
         mail.logout()
 
         if not kn_text or not en_text:
-            raise ValueError(f"Partial extraction. kn='{kn_text[:25]}', en='{en_text[:25]}'")
+            raise ValueError(f"Incomplete quote capture. kn='{kn_text[:25]}', en='{en_text[:25]}'")
 
-        print("Successfully extracted both quotes from Gmail thread.")
+        print(f"Successfully extracted: '{en_text[:40]}...'")
         return {
             "kannada_header": "ಒಂದು ಸುಂದರ ವಿಚಾರ",
             "kannada_date": fallback_kn_date,
@@ -148,10 +160,7 @@ def fetch_latest_thought_from_email(fallback_kn_date, fallback_en_date):
 def main():
     kannada_date_str, english_date_str = get_current_heartfulness_dates()
 
-    # 1. Fetch dynamic quotes
     thought_data = fetch_latest_thought_from_email(kannada_date_str, english_date_str)
-
-    # 2. Render status card
     image_path = HeartfulnessCardGenerator.create_card(thought_data, IMAGE_FILENAME)
 
     weekday_kn = kannada_date_str.split(",")[0]
@@ -167,7 +176,6 @@ def main():
 🔴 YouTube Live: https://www.youtube.com/@BeingHeartfulEveryDay/live
 ━━━━━━━━━━━━━━━"""
 
-    # 3. Dispatch to inbox
     yag = yagmail.SMTP(GMAIL_USER, GMAIL_APP_PASSWORD)
     subject = f"Heartfulness Thought & Schedule: {english_date_str}"
     
