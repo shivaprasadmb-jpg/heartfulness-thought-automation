@@ -38,31 +38,44 @@ def get_current_heartfulness_dates():
 
 
 def clean_text(raw_html_or_text):
-    """Strips <style>, <script>, and all HTML markup cleanly."""
-    # 1. Strip CSS style blocks completely so CSS font names like 'Helvetica' vanish
+    """Strips <style>, <script>, and all HTML markup cleanly to avoid CSS leaks."""
     text = re.sub(r'<style[^>]*>[\s\S]*?</style>', ' ', raw_html_or_text, flags=re.IGNORECASE)
-    # 2. Strip Script blocks
     text = re.sub(r'<script[^>]*>[\s\S]*?</script>', ' ', text, flags=re.IGNORECASE)
-    # 3. Strip HTML tags
     text = re.sub(r'<[^>]+>', ' ', text)
-    # 4. Unescape HTML entities (&nbsp;, &quot;, etc.)
     text = html.unescape(text)
-    # 5. Normalize whitespace
     text = re.sub(r'\s+', ' ', text)
     return text.strip()
 
 
 def clean_quote_punctuation(text):
-    """Cleans up quotation marks and spacing before punctuation."""
+    """Cleans quotation marks and spacing before punctuation."""
     t = text.strip().strip("“\"").strip("”\"").strip()
     t = re.sub(r'\s+([,.:;?!])', r'\1', t)
     return t
 
 
+def detect_author(plain_text):
+    """
+    Dynamically identifies the spiritual master (Babuji, Chariji, Lalaji, or Daaji)
+    for both English and Kannada signatures.
+    """
+    text_lower = plain_text.lower()
+    
+    # Priority checks for lineage masters
+    if "babuji" in text_lower or "ಬಾಬೂಜಿ" in plain_text or "ಬಾಬುಜಿ" in plain_text:
+        return "~ ಬಾಬೂಜಿ", "~ Babuji"
+    elif "chariji" in text_lower or "ಚಾರಿಜಿ" in plain_text:
+        return "~ ಚಾರಿಜಿ", "~ Chariji"
+    elif "lalaji" in text_lower or "ಲಾಲಾಜಿ" in plain_text:
+        return "~ ಲಾಲಾಜಿ", "~ Lalaji"
+    else:
+        return "~ ದಾಜಿ", "~ Daaji"
+
+
 def fetch_latest_thought_from_email(fallback_kn_date, fallback_en_date):
     """
     Connects to Gmail's All Mail folder, scans recent thought emails,
-    and extracts authentic Kannada and English sentences.
+    and extracts authentic quotes along with dynamic author signatures.
     """
     try:
         mail = imaplib.IMAP4_SSL("imap.gmail.com")
@@ -85,8 +98,9 @@ def fetch_latest_thought_from_email(fallback_kn_date, fallback_en_date):
 
         kn_text = ""
         en_text = ""
+        combined_text_for_author = ""
 
-        # Scan backwards across messages to capture both parts
+        # Scan backwards across messages to capture both parts from the thread
         for msg_id in reversed(id_list[-15:]):
             _, data = mail.fetch(msg_id, "(RFC822)")
             raw = email.message_from_bytes(data[0][1])
@@ -105,8 +119,9 @@ def fetch_latest_thought_from_email(fallback_kn_date, fallback_en_date):
                     body_content = payload.decode("utf-8", errors="ignore")
 
             plain = clean_text(body_content)
+            combined_text_for_author += " " + plain
 
-            # Extract Kannada quote (must contain Indic characters and spaces)
+            # Extract Kannada quote
             if not kn_text and "ಒಂದು ಸುಂದರ ವಿಚಾರ" in plain:
                 for match in re.finditer(r"[“\"]([^”\"]{20,})[”\"]", plain):
                     candidate = match.group(1).strip()
@@ -114,11 +129,10 @@ def fetch_latest_thought_from_email(fallback_kn_date, fallback_en_date):
                         kn_text = clean_quote_punctuation(candidate)
                         break
 
-            # Extract English quote (must be an actual sentence with multiple words)
+            # Extract English quote (filters out CSS strings like Helvetica)
             if not en_text and "One Beautiful Thought" in plain:
                 for match in re.finditer(r"[“\"]([^”\"]{20,})[”\"]", plain):
                     candidate = match.group(1).strip()
-                    # Must contain spaces and be a natural English sentence, not CSS metadata
                     if " " in candidate and not candidate.lower().startswith("font") and "helvetica" not in candidate.lower():
                         en_text = clean_quote_punctuation(candidate)
                         break
@@ -131,16 +145,18 @@ def fetch_latest_thought_from_email(fallback_kn_date, fallback_en_date):
         if not kn_text or not en_text:
             raise ValueError(f"Incomplete quote capture. kn='{kn_text[:25]}', en='{en_text[:25]}'")
 
-        print(f"Successfully extracted: '{en_text[:40]}...'")
+        kn_author, en_author = detect_author(combined_text_for_author)
+        print(f"Detected Master: {en_author}")
+
         return {
             "kannada_header": "ಒಂದು ಸುಂದರ ವಿಚಾರ",
             "kannada_date": fallback_kn_date,
             "kannada_quote": kn_text,
-            "kannada_author": "~ ದಾಜಿ",
+            "kannada_author": kn_author,
             "english_header": "One Beautiful Thought",
             "english_date": fallback_en_date,
             "english_quote": en_text,
-            "english_author": "~ Daaji",
+            "english_author": en_author,
         }
 
     except Exception as e:
@@ -148,19 +164,22 @@ def fetch_latest_thought_from_email(fallback_kn_date, fallback_en_date):
         return {
             "kannada_header": "ಒಂದು ಸುಂದರ ವಿಚಾರ",
             "kannada_date": fallback_kn_date,
-            "kannada_quote": "ಹೃದಯಾಧಾರಿತ ಧ್ಯಾನದ ಅಭ್ಯಾಸದಲ್ಲಿ, ನಾವು ನಮ್ಮ ಅಸ್ತಿತ್ವದ ಅತಿ ಸರಳ ಮತ್ತು ಪರಿಶುದ್ಧವಾದ ಅಂಶವನ್ನು ಅನ್ವೇಷಿಸುತ್ತೇವೆ ಹಾಗು ಅನುಭವಿಸುತ್ತೇವೆ.",
-            "kannada_author": "~ ದಾಜಿ",
+            "kannada_quote": "ಮನಸ್ಸು ಸೌಹಾರ್ದ ಸ್ಥಿತಿಯಲ್ಲಿದ್ದರೆ, ಸಂದರ್ಭಗಳು ಮತ್ತು ಪರಿಸರಗಳು ಅದರ ಮೇಲೆ ಪರಿಣಾಮ ಬೀರುವುದಿಲ್ಲ ಮತ್ತು ಆಂತರ್ಯದಲ್ಲಿ ಯಾವುದೇ ಕ್ಷೋಭೆ ಉಂಟಾಗುವುದಿಲ್ಲ.",
+            "kannada_author": "~ ಬಾಬೂಜಿ",
             "english_header": "One Beautiful Thought",
             "english_date": fallback_en_date,
-            "english_quote": "In a heart-based meditation practice, we explore and experience the simplest and purest aspect of our existence.",
-            "english_author": "~ Daaji",
+            "english_quote": "If mind comes to a harmonious state, circumstances and environments will have no effect on it and there will be no disturbance within.",
+            "english_author": "~ Babuji",
         }
 
 
 def main():
     kannada_date_str, english_date_str = get_current_heartfulness_dates()
 
+    # 1. Fetch dynamic quotes & authors
     thought_data = fetch_latest_thought_from_email(kannada_date_str, english_date_str)
+
+    # 2. Render status card
     image_path = HeartfulnessCardGenerator.create_card(thought_data, IMAGE_FILENAME)
 
     weekday_kn = kannada_date_str.split(",")[0]
@@ -176,6 +195,7 @@ def main():
 🔴 YouTube Live: https://www.youtube.com/@BeingHeartfulEveryDay/live
 ━━━━━━━━━━━━━━━"""
 
+    # 3. Dispatch to destination email
     yag = yagmail.SMTP(GMAIL_USER, GMAIL_APP_PASSWORD)
     subject = f"Heartfulness Thought & Schedule: {english_date_str}"
     
