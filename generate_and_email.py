@@ -64,12 +64,13 @@ def detect_author(plain_text):
     # Priority checks for lineage masters
     if "babuji" in text_lower or "ಬಾಬೂಜಿ" in plain_text or "ಬಾಬುಜಿ" in plain_text:
         return "~ ಬಾಬೂಜಿ", "~ Babuji"
-    elif "chariji" in text_lower or "ಚಾರಿಜಿ" in plain_text:
-        return "~ ಚಾರಿಜಿ", "~ Chariji"
+    elif "chariji" in text_lower or "ಚಾರೀಜಿ" in plain_text or "ಚಾರಿಜಿ" in plain_text:
+        return "~ ಚಾರೀಜಿ", "~ Chariji"
     elif "lalaji" in text_lower or "ಲಾಲಾಜಿ" in plain_text:
         return "~ ಲಾಲಾಜಿ", "~ Lalaji"
     else:
         return "~ ದಾಜಿ", "~ Daaji"
+
 
 
 def fetch_latest_thought_from_email(fallback_kn_date, fallback_en_date):
